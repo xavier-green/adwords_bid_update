@@ -1,0 +1,1 @@
+# Adwords manual bid updates
