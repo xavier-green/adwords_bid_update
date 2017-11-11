@@ -8,7 +8,7 @@ from googleads import adwords
 import os
 import json
 
-from helpers import adwords
+from .helpers import adwords_helper
 import multiprocessing as mp
 
 ADGROUP_CACHE = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'cache', 'adgroup_cache.json')
@@ -81,7 +81,7 @@ class KeywordFetch:
         adgroup_name = adgroup['name']
         service_name = 'AdGroupCriterionService'
         fields = ['Id', 'KeywordMatchType', 'KeywordText']
-        predicates = adwords.keyword_id_predicates(adgroup_id)
+        predicates = adwords_helper.keyword_id_predicates(adgroup_id)
         client = self.connect(self.manual_account_id)
         def processing_function(element, output):
             keyword_text = element['criterion']['text']
@@ -93,7 +93,7 @@ class KeywordFetch:
                 output[keyword_text][keyword_mt] = {}
             output[keyword_text][keyword_mt] = keyword_id
             return output
-        adgroup_keyword_ids_map = adwords.fetch_adwords_data(client, service_name, fields, predicates, processing_function)
+        adgroup_keyword_ids_map = adwords_helper.fetch_adwords_data(client, service_name, fields, predicates, processing_function, self.page_size)
         adgroup_keyword_ids_map = {
             adgroup_name: adgroup_keyword_ids_map
         }
@@ -109,7 +109,7 @@ class KeywordFetch:
         service_name = 'AdGroupService'
         fields = ['Id', 'Name']
         predicates = []
-        client = self.connect(self.manual_account_id)
+        # client = self.connect(self.manual_account_id)
         def processing_function(element, output):
             ad_group_name = element['name']
             ad_group_id = element['id']
@@ -117,7 +117,7 @@ class KeywordFetch:
                 output[ad_group_name] = {}
             output[ad_group_name] = ad_group_id
             return output
-        ad_group_map = adwords.fetch_adwords_data(client, service_name, fields, predicates, processing_function)
+        ad_group_map = adwords_helper.fetch_adwords_data(self.manual_account_id, service_name, fields, predicates, processing_function, self.page_size)
         with open(ADGROUP_CACHE, 'w') as fp:
             json.dump(ad_group_map, fp)
         print("Found",len(ad_group_map.keys()),"adgroups")
@@ -126,42 +126,23 @@ class KeywordFetch:
     def get_dummy_map(self, dummy_accounts):
         print("Getting dummy map...")
         pool = mp.Pool(processes=self.processes)
-        results = pool.map_async(self.get_account_dummy_keywords, dummy_accounts)
-        results = results.get()
+        processes = []
+        print(dummy_accounts)
+        for dummy_account in dummy_accounts:
+            page_size = self.page_size
+            processes.append(pool.apply_async(adwords_helper.get_account_dummy_keywords, args=(dummy_account, page_size, )))
+        results = [req.get() for req in processes]
         dummy_map = results.pop()
         for dummy_object in results:
             dummy_map.update(dummy_object)
         pool = None
         return dummy_map
 
-    def get_account_dummy_keywords(self, account_id):
-        client = self.connect(account_id)
-        service_name = 'AdGroupCriterionService'
-        fields = ['Id', 'KeywordMatchType', 'KeywordText', 'CpcBid', 'FinalUrls']
-        predicates = adwords.DUMMY_KEYWORD_PREDICATES
-        def processing_function(element, output):
-            keyword_text = element['criterion']['text']
-            keyword_mt = element['criterion']['matchType']
-            keyword_cpc = None
-            for bid in element['biddingStrategyConfiguration']['bids']:
-                bidtype = bid['Bids.Type']
-                if bidtype=="CpcBid":
-                    keyword_cpc = bid['bid']['microAmount']
-            keyword_url = element['finalUrls']['urls'][0]
-            if keyword_text not in output:
-                output[keyword_text] = {}
-            output[keyword_text][keyword_mt] = {
-                'bid': keyword_cpc,
-                'url': keyword_url
-            }
-            return output
-        account_dummy_map = adwords.fetch_adwords_data(client, service_name, fields, predicates, processing_function)
-        return account_dummy_map
-
     def connect(self, customer_id):
-        if customer_id in self.clients_dict:
+        if (self and (customer_id in self.clients_dict)):
             return self.clients_dict[customer_id]
         adwords_client = adwords.AdWordsClient.LoadFromStorage()
         adwords_client.SetClientCustomerId(customer_id)
-        self.clients_dict[customer_id] = adwords_client
+        if self:
+            self.clients_dict[customer_id] = adwords_client
         return adwords_client

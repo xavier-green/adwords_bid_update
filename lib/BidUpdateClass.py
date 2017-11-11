@@ -5,6 +5,7 @@ import locale
 locale.setlocale(locale.LC_ALL, 'fr-FR')
 
 from googleads import adwords
+import os
 
 UPDATE_LOG = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'cache', 'keyword_cache.json')
 
@@ -12,6 +13,7 @@ class BidUpdate:
 
     def __init__(self, manual_account_id="392-078-0567", processes=4):
         self.client = self.connect()
+        self.manual_account_id = manual_account_id
         self.processes = processes
 
     def update_all_bids(self, bid_update_map):
