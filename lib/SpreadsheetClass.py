@@ -22,7 +22,7 @@ class Spreadsheet:
         self.client = self.connect()
         self.dummy_accounts = self.get_dummy_accounts()
 
-    def getKeywordData(self, dummy_map):
+    def get_manual_keywords_data(self, dummy_map):
         rangeName = 'kwmap!A:E'
         result = self.client.spreadsheets().values().get(
             spreadsheetId=SPREADSHEET_ID, range=rangeName).execute()
