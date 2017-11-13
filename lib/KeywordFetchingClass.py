@@ -66,7 +66,7 @@ class KeywordFetch:
         keyword_id_requests = []
         pool = mp.Pool(processes=self.processes)
         for adgroup in adgroup_ids:
-            keyword_id_requests.append(pool.apply_async(self.get_adgroup_keyword_ids_map, args=(ManualAccountId, adgroup, )))
+            keyword_id_requests.append(pool.apply_async(adwords_helper.get_adgroup_keyword_ids_map, args=(ManualAccountId, adgroup, )))
         keywords_response = [req.get() for req in keyword_id_requests]
         pool = None
         keyword_id_map = keywords_response.pop()
@@ -75,29 +75,6 @@ class KeywordFetch:
         with open(KEYWORDS_IDS_CACHE, 'w') as fp:
             json.dump(keyword_id_map, fp)
         return keyword_id_map
-
-    def get_adgroup_keyword_ids_map(self, adgroup):
-        adgroup_id = adgroup['id']
-        adgroup_name = adgroup['name']
-        service_name = 'AdGroupCriterionService'
-        fields = ['Id', 'KeywordMatchType', 'KeywordText']
-        predicates = adwords_helper.keyword_id_predicates(adgroup_id)
-        client = self.connect(self.manual_account_id)
-        def processing_function(element, output):
-            keyword_text = element['criterion']['text']
-            keyword_mt = element['criterion']['matchType']
-            keyword_id = element['criterion']['id']
-            if keyword_text not in output:
-                output[keyword_text] = {}
-            if keyword_mt not in output[keyword_text]:
-                output[keyword_text][keyword_mt] = {}
-            output[keyword_text][keyword_mt] = keyword_id
-            return output
-        adgroup_keyword_ids_map = adwords_helper.fetch_adwords_data(client, service_name, fields, predicates, processing_function, self.page_size)
-        adgroup_keyword_ids_map = {
-            adgroup_name: adgroup_keyword_ids_map
-        }
-        return adgroup_keyword_ids_map
 
     def get_adgroup_map(self):
         print("Getting adgroup mapping...")
