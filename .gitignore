@@ -1,4 +1,4 @@
 credentials/
 v201710/
 cache/
-bidupdate.json
+__pycache__/
