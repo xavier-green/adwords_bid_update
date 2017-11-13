@@ -12,15 +12,17 @@ UPDATE_LOG = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'ca
 class BidUpdate:
 
     def __init__(self, manual_account_id="392-078-0567", processes=4):
-        self.client = self.connect()
         self.manual_account_id = manual_account_id
+        self.client = self.connect()
         self.processes = processes
 
     def update_all_bids(self, bid_update_map):
         processes = []
         pool = mp.Pool(processes=self.processes)
+        def update_bid(adgroupid, adgroup_object):
+            return self.update_bids(adgroupid, adgroup_object)
         for adgroupid in bid_update_map:
-            processes.append(pool.apply_async(bidupdate.update_bid, args=(adgroupid, bid_update_map[adgroupid], )))
+            processes.append(pool.apply_async(update_bid, args=(adgroupid, bid_update_map[adgroupid], )))
         results = [req.get() for req in processes]
         with open(UPDATE_LOG, 'w') as fp:
             json.dump(results, fp)

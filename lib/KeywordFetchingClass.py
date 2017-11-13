@@ -37,9 +37,9 @@ class KeywordFetch:
         for adgroup in adgroup_ids:
             adgroup_id = adgroup['id']
             adgroup_name = adgroup['name']
-            for keyword in keyword_to_update_map[adgroup_name]:
-                for mt in keyword_to_update_map[adgroup_name][keyword]:
-                    bid = keyword_to_update_map[adgroup_name][keyword][mt]['bid']
+            for keyword in keywords_to_update_map[adgroup_name]:
+                for mt in keywords_to_update_map[adgroup_name][keyword]:
+                    bid = keywords_to_update_map[adgroup_name][keyword][mt]['bid']
                     keyword_clean = keyword.replace("[","").replace("]","")
                     if ((keyword_clean in keyword_id_map[adgroup_name]) and (mt in keyword_id_map[adgroup_name][keyword_clean])):
                         # print(keyword_id_map[adgroup_name][keyword_clean])
@@ -66,7 +66,9 @@ class KeywordFetch:
         keyword_id_requests = []
         pool = mp.Pool(processes=self.processes)
         for adgroup in adgroup_ids:
-            keyword_id_requests.append(pool.apply_async(adwords_helper.get_adgroup_keyword_ids_map, args=(ManualAccountId, adgroup, )))
+            account_id = self.manual_account_id
+            page_size = self.page_size
+            keyword_id_requests.append(pool.apply_async(adwords_helper.get_adgroup_keyword_ids_map, args=(account_id, adgroup, page_size, )))
         keywords_response = [req.get() for req in keyword_id_requests]
         pool = None
         keyword_id_map = keywords_response.pop()

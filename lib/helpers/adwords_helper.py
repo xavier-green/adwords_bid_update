@@ -70,7 +70,7 @@ def get_account_dummy_keywords(customer_id, page_size):
     account_dummy_map = fetch_adwords_data(customer_id, service_name, fields, predicates, processing_function, page_size)
     return account_dummy_map
 
-def get_adgroup_keyword_ids_map(customer_id, adgroup):
+def get_adgroup_keyword_ids_map(customer_id, adgroup, page_size):
     adgroup_id = adgroup['id']
     adgroup_name = adgroup['name']
     service_name = 'AdGroupCriterionService'
@@ -86,7 +86,7 @@ def get_adgroup_keyword_ids_map(customer_id, adgroup):
             output[keyword_text][keyword_mt] = {}
         output[keyword_text][keyword_mt] = keyword_id
         return output
-    adgroup_keyword_ids_map = fetch_adwords_data(customer_id, service_name, fields, predicates, processing_function, self.page_size)
+    adgroup_keyword_ids_map = fetch_adwords_data(customer_id, service_name, fields, predicates, processing_function, page_size)
     adgroup_keyword_ids_map = {
         adgroup_name: adgroup_keyword_ids_map
     }
