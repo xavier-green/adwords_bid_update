@@ -152,7 +152,7 @@ def update_bids(customer_id, adgroupid, adgroup_object):
        newbid = adgroup_object[keywordid]['bid']
        if round(newbid,0) != 0:
            if newbid == 500000:
-               newbid = 100000
+               newbid = 200000
            operations.append(create_bid_service(adgroupid, keywordid, newbid))
 
     response = ad_group_criterion_service.mutate(operations)
