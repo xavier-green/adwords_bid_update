@@ -117,7 +117,7 @@ def fetch_adwords_data(customer_id, service_name, fields, predicates, processing
         offset += page_size
         selector['paging']['startIndex'] = str(offset)
         more_pages = offset < int(page['totalNumEntries'])
-        more_pages = False
+        # more_pages = False
     return output
 
 def create_bid_service(ad_group_id, criterion_id, newbid):
