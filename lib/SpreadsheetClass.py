@@ -29,7 +29,7 @@ class Spreadsheet:
         values = result.get('values', [])[1:]
         keyword_map = {}
         for row in values:
-            dummy = row[0]; mt = row[1]; kw = row[2]; adgroup = row[3]
+            dummy = row[0]; mt = row[1]; kw = row[2]; adgroup = row[3]; campaign = row[4]
             if (adgroup not in keyword_map):
               keyword_map[adgroup] = {}
             if (kw not in keyword_map[adgroup]):
@@ -41,7 +41,8 @@ class Spreadsheet:
               url = dummy_map[dummy][mt]['url']
               keyword_map[adgroup][kw][mt] = {
                 'bid': bid,
-                'url': url
+                'url': url,
+                'campaign': campaign
               }
             else:
               keyword_map[adgroup][kw][mt] = {

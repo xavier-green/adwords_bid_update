@@ -1,4 +1,4 @@
-from .. import KeywordFetchingClass
+from .. import KeywordFetchingClass, BidUpdateClass
 
 DUMMY_KEYWORD_PREDICATES = [
     {
@@ -73,6 +73,7 @@ def get_account_dummy_keywords(customer_id, page_size):
 def get_adgroup_keyword_ids_map(customer_id, adgroup, page_size):
     adgroup_id = adgroup['id']
     adgroup_name = adgroup['name']
+    print("Fetching all keywords in", adgroup_name)
     service_name = 'AdGroupCriterionService'
     fields = ['Id', 'KeywordMatchType', 'KeywordText']
     predicates = keyword_id_predicates(adgroup_id)
@@ -87,6 +88,7 @@ def get_adgroup_keyword_ids_map(customer_id, adgroup, page_size):
         output[keyword_text][keyword_mt] = keyword_id
         return output
     adgroup_keyword_ids_map = fetch_adwords_data(customer_id, service_name, fields, predicates, processing_function, page_size)
+    print("Found",len(adgroup_keyword_ids_map.keys()),"keywords in",adgroup_name)
     adgroup_keyword_ids_map = {
         adgroup_name: adgroup_keyword_ids_map
     }
@@ -116,4 +118,66 @@ def fetch_adwords_data(customer_id, service_name, fields, predicates, processing
         selector['paging']['startIndex'] = str(offset)
         more_pages = offset < int(page['totalNumEntries'])
         more_pages = False
+    return output
+
+def create_bid_service(ad_group_id, criterion_id, newbid):
+    return {
+        'operator': 'SET',
+        'operand': {
+            'xsi_type': 'BiddableAdGroupCriterion',
+            'adGroupId': ad_group_id,
+            'criterion': {
+                'id': criterion_id,
+            },
+            'biddingStrategyConfiguration': {
+                'bids': [
+                    {
+                        'xsi_type': 'CpcBid',
+                        'bid': {
+                            'microAmount': newbid
+                        }
+                    }
+                ]
+            }
+        }
+    }
+
+def update_bids(customer_id, adgroupid, adgroup_object):
+    client = BidUpdateClass.BidUpdate.connect(None, customer_id)
+    ad_group_criterion_service = client.GetService(
+      'AdGroupCriterionService', version='v201710')
+    operations = []
+    tracking_map = {}
+    for keywordid in adgroup_object:
+       newbid = adgroup_object[keywordid]['bid']
+       if round(newbid,0) != 0:
+           if newbid == 500000:
+               newbid = 100000
+           operations.append(create_bid_service(adgroupid, keywordid, newbid))
+
+    response = ad_group_criterion_service.mutate(operations)
+    # print(response)
+    if not response:
+      print('Failed to process bid queue for',adgroupid)
+
+    output = "" #[]
+    if 'value' in response:
+      for criterion in response['value']:
+        if criterion['criterion']['Criterion.Type'] == 'Keyword':
+          for bid in criterion['biddingStrategyConfiguration']['bids']:
+              bidtype = bid['Bids.Type']
+              if bidtype=="CpcBid":
+                  k_id = criterion['criterion']['id']
+                  output += adgroup_object[k_id]['adgroup_name']+";"+adgroup_object[k_id]['keyword']+";"+str(bid['bid']['microAmount'])+"\n";
+                  # output.append({
+                  #     'newbid':bid['bid']['microAmount'],
+                  #     'adgroupid':adgroupid,
+                  #     'keywordid':k_id,
+                  #     'campaign': adgroup_object[k_id]['campaign'],
+                  #     'adgroup_name': adgroup_object[k_id]['adgroup_name']
+                  # })
+    else:
+      output.append(None)
+      print('No ad group criteria were updated.')
+
     return output

@@ -13,6 +13,7 @@ import multiprocessing as mp
 
 ADGROUP_CACHE = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'cache', 'adgroup_cache.json')
 KEYWORDS_IDS_CACHE = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'cache', 'keyword_cache.json')
+BID_ERROR_CACHE = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'cache', 'bid_error_cache.json')
 
 class KeywordFetch:
 
@@ -40,6 +41,7 @@ class KeywordFetch:
             for keyword in keywords_to_update_map[adgroup_name]:
                 for mt in keywords_to_update_map[adgroup_name][keyword]:
                     bid = keywords_to_update_map[adgroup_name][keyword][mt]['bid']
+                    # campaign = keywords_to_update_map[adgroup_name][keyword][mt]['campaign']
                     keyword_clean = keyword.replace("[","").replace("]","")
                     if ((keyword_clean in keyword_id_map[adgroup_name]) and (mt in keyword_id_map[adgroup_name][keyword_clean])):
                         # print(keyword_id_map[adgroup_name][keyword_clean])
@@ -48,12 +50,19 @@ class KeywordFetch:
                             bid_update_map[adgroup_id] = {}
                         if keyword_id not in bid_update_map[adgroup_id]:
                             bid_update_map[adgroup_id][keyword_id] = {}
-                        bid_update_map[adgroup_id][keyword_id] = bid
+                        bid_update_map[adgroup_id][keyword_id] = {
+                            'bid': bid,
+                            # 'campaign': campaign,
+                            'adgroup_name': adgroup_name,
+                            'keyword': keyword
+                        }
                     else:
                         bid_error_kw.append({
                             'keyword': keyword,
                             'adgroup': adgroup_name
                         })
+        with open(BID_ERROR_CACHE, 'w') as fp:
+            json.dump(bid_error_kw, fp)
         return bid_update_map
 
     def get_keyword_ids_map(self, adgroup_ids):
@@ -87,7 +96,11 @@ class KeywordFetch:
             return data
         service_name = 'AdGroupService'
         fields = ['Id', 'Name']
-        predicates = []
+        predicates = [{
+            'field': 'Status',
+            'operator': 'EQUALS',
+            'values': ['ENABLED']
+        }]
         # client = self.connect(self.manual_account_id)
         def processing_function(element, output):
             ad_group_name = element['name']

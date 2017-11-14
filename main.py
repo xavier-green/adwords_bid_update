@@ -129,7 +129,7 @@ if __name__ ==  '__main__':
 
     keyword_ids_map = adwords_keywords.get_keyword_ids_map(adgroups_to_update_map)
 
-    bid_update_map = adwords_keywords.generate_bid_update_map(adgroups_to_update_map, keywords_to_update_map, keyword_ids_map)
+    # bid_update_map = adwords_keywords.generate_bid_update_map(adgroups_to_update_map, keywords_to_update_map, keyword_ids_map)
 
     # bid_updater.update_all_bids(bid_update_map)
 
