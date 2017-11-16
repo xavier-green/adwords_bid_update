@@ -1,4 +1,5 @@
-credentials/
+credentials/client_secret.json
+credentials/mozart_credentials.json
 v201710/
 cache/
 __pycache__/

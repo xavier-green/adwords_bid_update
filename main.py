@@ -4,10 +4,6 @@
 import locale
 locale.setlocale(locale.LC_ALL, 'fr-FR')
 
-import sheets
-import keywords
-import adgroups
-import bidupdate
 import multiprocessing as mp
 import time
 import json
