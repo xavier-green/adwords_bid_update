@@ -14,6 +14,7 @@ import multiprocessing as mp
 ADGROUP_CACHE = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'cache', 'adgroup_cache.json')
 KEYWORDS_IDS_CACHE = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'cache', 'keyword_cache.json')
 BID_ERROR_CACHE = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'cache', 'bid_error_cache.json')
+BID_UPDATE_CACHE = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'cache', 'bid_update_cache.json')
 
 class KeywordFetch:
 
@@ -63,6 +64,8 @@ class KeywordFetch:
                         })
         with open(BID_ERROR_CACHE, 'w') as fp:
             json.dump(bid_error_kw, fp)
+        with open(BID_UPDATE_CACHE, 'w') as fp:
+            json.dump(bid_update_map, fp)
         return bid_update_map
 
     def get_keyword_ids_map(self, adgroup_ids):

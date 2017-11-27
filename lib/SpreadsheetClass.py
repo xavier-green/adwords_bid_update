@@ -15,6 +15,7 @@ SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly'
 CLIENT_SECRET_FILE = 'credentials/client_secret.json'
 APPLICATION_NAME = 'Mozart DE Sync Sheet'
 SPREADSHEET_ID = '1yluHUk3xsHCzRTUm679gcLP5K2TcxEoPN-IfHywgYKg'
+import json
 
 class Spreadsheet:
 
@@ -24,12 +25,25 @@ class Spreadsheet:
 
     def get_manual_keywords_data(self, dummy_map):
         rangeName = 'kwmap!A:E'
+        nlbe = 'nlbe!A:E'
+        values = []
+        # result = self.client.spreadsheets().values().get(
+        #     spreadsheetId=SPREADSHEET_ID, range=rangeName).execute()
+        # values = result.get('values', [])[1:]
+        # print("Found", len(values), "rows in first mozart sheet")
         result = self.client.spreadsheets().values().get(
-            spreadsheetId=SPREADSHEET_ID, range=rangeName).execute()
+            spreadsheetId=SPREADSHEET_ID, range=nlbe).execute()
         values = result.get('values', [])[1:]
         keyword_map = {}
+        print("Found", len(values), "rows in both mozart sheet")
+        log_str = ""
         for row in values:
-            dummy = row[0]; mt = row[1]; kw = row[2]; adgroup = row[3]; campaign = row[4]
+            try:
+                dummy = row[0]; mt = row[1]; kw = row[2]; adgroup = row[3]; campaign = row[4]
+                log_str += dummy+";"+mt+";"+kw+";"+adgroup+";"+campaign+"\n"
+            except:
+                print(row)
+                break;
             if (adgroup not in keyword_map):
               keyword_map[adgroup] = {}
             if (kw not in keyword_map[adgroup]):
@@ -46,7 +60,7 @@ class Spreadsheet:
               }
             else:
               keyword_map[adgroup][kw][mt] = {
-                'bid': 0.5,
+                'bid': 500000,
                 'url': None
               }
         return(keyword_map)

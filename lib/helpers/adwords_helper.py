@@ -151,7 +151,7 @@ def update_bids(customer_id, adgroupid, adgroup_object):
     for keywordid in adgroup_object:
        newbid = adgroup_object[keywordid]['bid']
        if round(newbid,0) != 0:
-           if newbid == 500000:
+           if newbid == 500000: #If hydra fails to sync the keyword, set the default to 20c
                newbid = 200000
            operations.append(create_bid_service(adgroupid, keywordid, newbid))
 
@@ -160,7 +160,7 @@ def update_bids(customer_id, adgroupid, adgroup_object):
     if not response:
       print('Failed to process bid queue for',adgroupid)
 
-    output = "" #[]
+    output = ""
     if 'value' in response:
       for criterion in response['value']:
         if criterion['criterion']['Criterion.Type'] == 'Keyword':
@@ -168,16 +168,11 @@ def update_bids(customer_id, adgroupid, adgroup_object):
               bidtype = bid['Bids.Type']
               if bidtype=="CpcBid":
                   k_id = criterion['criterion']['id']
-                  output += adgroup_object[k_id]['adgroup_name']+";"+adgroup_object[k_id]['keyword']+";"+str(bid['bid']['microAmount'])+"\n";
-                  # output.append({
-                  #     'newbid':bid['bid']['microAmount'],
-                  #     'adgroupid':adgroupid,
-                  #     'keywordid':k_id,
-                  #     'campaign': adgroup_object[k_id]['campaign'],
-                  #     'adgroup_name': adgroup_object[k_id]['adgroup_name']
-                  # })
+                  try:
+                      output += adgroup_object[k_id]['adgroup_name']+";"+adgroup_object[k_id]['keyword']+";"+str(bid['bid']['microAmount'])+"\n";
+                  except:
+                      pass
     else:
-      output.append(None)
       print('No ad group criteria were updated.')
 
-    return output
+    return response
