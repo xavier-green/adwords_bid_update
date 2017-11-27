@@ -142,7 +142,7 @@ def create_bid_service(ad_group_id, criterion_id, newbid):
         }
     }
 
-def update_bids(customer_id, adgroupid, adgroup_object):
+def update_bids(customer_id, adgroupid, adgroup_object, attempts=3):
     client = BidUpdateClass.BidUpdate.connect(None, customer_id)
     ad_group_criterion_service = client.GetService(
       'AdGroupCriterionService', version='v201710')
@@ -156,7 +156,6 @@ def update_bids(customer_id, adgroupid, adgroup_object):
            operations.append(create_bid_service(adgroupid, keywordid, newbid))
 
     response = ad_group_criterion_service.mutate(operations)
-    # print(response)
     if not response:
       print('Failed to process bid queue for',adgroupid)
 
@@ -172,7 +171,14 @@ def update_bids(customer_id, adgroupid, adgroup_object):
                       output += adgroup_object[k_id]['adgroup_name']+";"+adgroup_object[k_id]['keyword']+";"+str(bid['bid']['microAmount'])+"\n";
                   except:
                       pass
+    elif 'isFault' in  result:
+        if result['isFault']:
+            print("refresh because of error")
+            if attempts==0:
+                print("Error after 3 refresh")
+                return None
+            update_bids(customer_id, adgroupid, adgroup_object, attempts-1)
     else:
       print('No ad group criteria were updated.')
 
-    return response
+    return output

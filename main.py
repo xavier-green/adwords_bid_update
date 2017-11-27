@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+#
 import locale
 locale.setlocale(locale.LC_ALL, 'fr-FR')
 
@@ -12,12 +12,14 @@ import os.path
 from lib.SpreadsheetClass import Spreadsheet
 from lib.KeywordFetchingClass import KeywordFetch
 from lib.BidUpdateClass import BidUpdate
+from lib.S3Class import Bucket
 
 
 if __name__ ==  '__main__':
 
     # Initialization of the spreadsheet, containing manual account IDs and dummy placeholders
-    mozart_sheet = Spreadsheet()
+    # mozart_sheet = Spreadsheet()
+    mozart_sheet = Bucket()
     dummy_accounts = mozart_sheet.dummy_accounts
 
     # We then create a dictionnary mapping the dummy placeholders to their udpated bid

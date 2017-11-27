@@ -44,25 +44,9 @@ class BidUpdate:
                 total_splits.append(submap)
                 time.sleep(30)
         results = [req.get() for req in processes]
-        for i,result in enumerate(results):
-            if 'isFault' in  result:
-                if result['isFault']:
-                    self.refreshIfError(total_splits[i])
-        # results = "".join(results)
         # with open(UPDATE_LOG, 'w') as fp:
         #     json.dump(results, fp)
         return("Done")
-
-    def refreshIfError(self, split, attempts=3):
-        print("refresh because of error")
-        if attempts==0:
-            print("Error after 3 refresh")
-            return None
-        resp = adwords_helper.update_bids, args=(account_id, adgroupid, submap, )
-        if 'isFault' in  resp:
-            if resp['isFault']:
-                time.sleep(120)
-                self.refreshIfError(total_splits[i], attempts-1)
 
 
 
