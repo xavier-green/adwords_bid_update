@@ -24,7 +24,7 @@ class KeywordFetch:
                 adgroup_from_cache=False,
                 keyword_ids_from_cache=False,
                 processes=4):
-        self.clients_dict = {} #Since we are pulling data from multiple accounts, keep track of their clients here
+        self.clients_dict = {} #Since we are pulling data from multiple accounts, keep track of their client IDs here
         self.page_size = page_size
         self.processes = processes
         self.keyword_ids_from_cache = keyword_ids_from_cache
@@ -42,8 +42,9 @@ class KeywordFetch:
             for keyword in keywords_to_update_map[adgroup_name]:
                 for mt in keywords_to_update_map[adgroup_name][keyword]:
                     bid = keywords_to_update_map[adgroup_name][keyword][mt]['bid']
-                    # campaign = keywords_to_update_map[adgroup_name][keyword][mt]['campaign']
+                    # In the map with the dummy placeholders, keywords are text-only, their match type is defined in a separate field
                     keyword_clean = keyword.replace("[","").replace("]","")
+                    # Get the according bid from the dummy map
                     if ((keyword_clean in keyword_id_map[adgroup_name]) and (mt in keyword_id_map[adgroup_name][keyword_clean])):
                         # print(keyword_id_map[adgroup_name][keyword_clean])
                         keyword_id = keyword_id_map[adgroup_name][keyword_clean][mt]
@@ -58,6 +59,7 @@ class KeywordFetch:
                             'keyword': keyword
                         }
                     else:
+                        # It means the dummy associated with the keyword was not found
                         bid_error_kw.append({
                             'keyword': keyword,
                             'adgroup': adgroup_name
@@ -104,7 +106,7 @@ class KeywordFetch:
             'operator': 'EQUALS',
             'values': ['ENABLED']
         }]
-        # client = self.connect(self.manual_account_id)
+        # Callback function
         def processing_function(element, output):
             ad_group_name = element['name']
             ad_group_id = element['id']
