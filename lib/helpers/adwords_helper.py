@@ -150,8 +150,9 @@ def update_bids(customer_id, adgroupid, adgroup_object, attempts=3):
     tracking_map = {}
     for keywordid in adgroup_object:
        newbid = adgroup_object[keywordid]['bid']
+       adgroupname = adgroup_object[keywordid]['adgroup_name']
        if round(newbid,0) != 0:
-           if newbid == 500000: #If hydra fails to sync the keyword, set the default to 20c
+           if( newbid == 500000 and ('nl_' not in adgroupname.lower())): #If hydra fails to sync the keyword, set the default to 20c except for NL
                newbid = 200000
            operations.append(create_bid_service(adgroupid, keywordid, newbid))
 

@@ -32,7 +32,7 @@ class Spreadsheet:
         # values = result.get('values', [])[1:]
         # print("Found", len(values), "rows in first mozart sheet")
         result = self.client.spreadsheets().values().get(
-            spreadsheetId=SPREADSHEET_ID, range=nlbe).execute()
+            spreadsheetId=SPREADSHEET_ID, range=rangeName).execute()
         values = result.get('values', [])[1:]
         keyword_map = {}
         print("Found", len(values), "rows in both mozart sheet")

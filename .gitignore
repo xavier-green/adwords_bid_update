@@ -1,5 +1,6 @@
 credentials/client_secret.json
 credentials/mozart_credentials.json
+credentials/googleads.yaml
 v201710/
 cache/
 __pycache__/

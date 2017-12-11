@@ -18,8 +18,8 @@ from lib.S3Class import Bucket
 if __name__ ==  '__main__':
 
     # Initialization of the spreadsheet, containing manual account IDs and dummy placeholders
-    # mozart_sheet = Spreadsheet()
-    mozart_sheet = Bucket()
+    mozart_sheet = Spreadsheet()
+    # mozart_sheet = Bucket()
     dummy_accounts = mozart_sheet.dummy_accounts
 
     # We then create a dictionnary mapping the dummy placeholders to their udpated bid

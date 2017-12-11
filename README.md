@@ -1,4 +1,4 @@
-# Datadog Monitoring Project
+# Mozart Bid Synchronization
 
 This project allows the bid syncing between Adwords keywords.
 
